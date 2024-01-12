@@ -1,0 +1,89 @@
+{% extends 'base.html' %} 
+{% load static %} 
+
+{% block title %}Book Details{% endblock %} 
+{% block content %}
+<div class="container mx-auto items-center my-12 lg:flex-grow bg-white p-4">
+
+    <div class="grid grid-cols-2 xl:grid-cols-2">
+        <img src="{{ book.image.url }}" alt="{{ book.name }}" width = "200">
+       
+        <div class="mb-2 font-bold text-3xl">
+          <h2 >{{ book.name }}</h2>
+          <p class="text-gray-700 text-base">Price: ${{ book.price }}</p>
+          <p class="text-gray-700 text-base"> Quantity: {{ book.quantity }} Pc</p>
+          <p class="text-gray-700 text-base"> About: <br> {{ book.description }}</p>
+          <p class="text-gray-700 text-base"> Total Reviews :  {{ book.reviews.count  }}</p>
+          <p class="text-gray-700 text-base"> Total Borrowed :  {{ book.book.count }}</p>
+          <hr>
+     
+          {% if request.user.is_authenticated %}
+            <form method="post" action="{% url 'borrow_book' book.id %}">
+                {% csrf_token %}
+                <button type="submit" class="mr-2 inline-block font-medium text-sm px-4 py-2 leading-none bg-blue-900 rounded text-white border-white hover:border-transparent hover:text-gray-800 hover:bg-red-700 mt-4 lg:mt-0">Borrow Now</button>
+            </form>
+            {% else %}
+            <div>
+                <a href="{% url 'login' %}" class="mr-2 inline-block font-medium text-sm px-4 py-2 leading-none bg-blue-900 rounded text-white border-white hover:border-transparent hover:text-gray-800 hover:bg-red-700 mt-4 lg:mt-0">Login To Borrow</a>          
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+<div class="container mx-auto items-center my-12 lg:flex-grow bg-white p-4 mb-20">
+    <div class="grid grid-cols-1 xl:grid-cols-1">
+        <div>
+            <h3>Reviews</h3>
+            {% for review in book.reviews.all %}
+                <p>{{ review.user.username }} - {{ review.rating }} stars - {{ review.comment }}</p>
+            {% endfor %}
+            {% if request.user.is_authenticated %}
+                {% if form.non_field_errors %} 
+                    {% for error in form.non_field_errors %}
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-2" role="alert">
+                        <p class="font-bold">Error!</p>
+                        <p class="block sm:inline">{{ error }}</p>
+                    </div>
+                    {% endfor %} 
+                {% endif %} 
+                {% if form.non_field_errors %} 
+                    {% for error in form.non_field_errors %}
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-2" role="alert">
+                        <p class="font-bold">Error!</p>
+                        <p class="block sm:inline">{{ error }}</p>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                {% if can_add_review %}
+                    <div class="bg-white px-3 py-4 rounded-xl my-6">
+                        <h1 class="font-bold text-3xl text-center pb-5">Write About your Experience After Reading this book</h1>
+                        <div class="w-full mt-10">
+
+                            <form method="post" action="{% url 'add_review' book.id %}" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                                {% csrf_token %} 
+                                {% for hidden_field in form.hidden_fields %} 
+                                {{ hidden_field.errors }} {{ hidden_field }} 
+                                {% endfor %}
+                                
+                                <div class="-mx-3 mb-6">
+                                    {% csrf_token %}
+                                    {{ review_form }}
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                                        Submit Review
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+       
+    </div>
+</div>
+
+{% endblock %}

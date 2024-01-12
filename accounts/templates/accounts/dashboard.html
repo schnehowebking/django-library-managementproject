@@ -1,0 +1,93 @@
+{% extends 'base.html' %} 
+{% load static %} 
+{% block title %}Profile{% endblock %} 
+{% block content %} 
+{% if form.non_field_errors %} 
+{% for error in form.non_field_errors %}
+<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-2" role="alert">
+    <p class="font-bold">Error!</p>
+    <p class="block sm:inline">{{ error }}</p>
+</div>
+{% endfor %} 
+{% endif %} 
+{% if form.non_field_errors %} 
+{% for error in form.non_field_errors %}
+<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-2" role="alert">
+    <p class="font-bold">Error!</p>
+    <p class="block sm:inline">{{ error }}</p>
+</div>
+{% endfor %}
+ {% endif %}
+
+   
+ 
+ 
+ 
+ <div class="py-3 px-4 bg-white rounded-2xl shadow-md mt-5 mb-20">
+   <div class="w-full mt-2 align-middle justify-center">
+     <h4 class="font-bold text-3xl text-left pb-5">Library ID: {{request.user.account.library_acc}}</h4>
+     <h1 class="font-bold text-3xl">Welcome {{request.user.first_name}} {{request.user.last_name}}</h1>
+      <a href="{% url 'profile_update' %}" class="bg-blue-900 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+        Update Profile
+      </a>
+      <a href ="{% url 'change_password' %}" class="bg-blue-900 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+        Chamge Password
+      </a>
+      <a href="{% url 'deposit_money' %}" class="bg-gray-900 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+          Deposit To My Wallet
+      </a>
+    
+    </div>
+    <h1 class="font-bold text-2xl text-center pt-2">Book Borrow Reports</h1>
+
+    <table class="table-auto mx-auto w-full px-5 rounded-xl mt-8 border dark:border-neutral-500">
+      <thead class="bg-purple-900 text-white text-left">
+        <tr class="bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-md py-2 px-4 text-white font-bold">
+          <th class="px-4 py-2">Date</th>
+          <th class="px-4 py-2">Book Name</th>
+          <th class="px-4 py-2">Price</th>
+          <th class="px-4 py-2">Balance After Borrow</th>
+          <th class="px-4 py-2">Borrow Date</th>
+          <th class="px-4 py-2">Status</th>
+          <th class="px-4 py-2">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if borrow_books %}
+          {% for borrow_book in borrow_books %}
+            <tr class="border-b dark:border-neutral-500">
+              <td class="px-4 py-2">{{ borrow_book.timestamp|date:"F d, Y h:i A" }}</td>
+              <td class="px-4 py-3 text-s border">
+                <span class="px-2 py-1 font-bold leading-tight rounded-sm {% if borrow_book.get_transaction_type_display == 'Withdrawal' %} text-red-700 bg-red-100 {% else %} text-green-700 bg-green-100 {% endif %}">
+                  {{ borrow_book.book.name }}
+                </span>
+              </td>
+              <td class="px-4 py-2">${{ borrow_book.borrow_price|floatformat:2 }}</td>
+              <td class="px-4 py-2">${{ borrow_book.transation.balance_after_transaction|floatformat:2 }}</td>
+              <td class="px-4 py-2">{{ borrow_book.borrow_date|date:"F d, Y h:i A" }}</td>
+              <td class="px-4 py-2">{{ borrow_book.status }}</td>
+              <td class="px-4 py-2">
+                {% if borrow_book.status == 'Borrowed' %}
+                  <form method="post" action="{% url 'return_book' borrow_book.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded">Return Book</button>
+                  </form>
+                  
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr class="border-b dark:border-neutral-500">
+            <td class="px-4 py-2" colspan="7">No Data available</td>
+          </tr>
+        {% endif %}
+        <tr class="bg-gray-800 text-white">
+          <th class="px-4 py-2 text-right" colspan="7"></th>
+          <th class="px-4 py-2 text-left"></th>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+{% endblock %}
